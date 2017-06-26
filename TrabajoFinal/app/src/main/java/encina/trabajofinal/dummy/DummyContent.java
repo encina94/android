@@ -1,13 +1,18 @@
 package encina.trabajofinal.dummy;
 
 
+
 import android.graphics.drawable.Drawable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import android.content.Context;
+import android.database.Cursor;
+import android.database.SQLException;
+import android.database.sqlite.SQLiteDatabase;
+
+import encina.trabajofinal.DatabaseHelper;
 
 /**
  * Helper class for providing sample content for user interfaces created by
@@ -16,6 +21,7 @@ import android.content.Context;
  * TODO: Replace all uses of this class before publishing your app.
  */
 public class DummyContent {
+
 
     /**
      * An array of sample (dummy) items.
@@ -28,34 +34,32 @@ public class DummyContent {
     public static final Map<String, DummyItem> ITEM_MAP = new HashMap<String, DummyItem>();
 
 
-    static{
-        addItem(new DummyItem("1","loro","La hamburguesa mas rica del condado","15-03-2017","-34.7849226","-58.2151892"));
-        addItem(new DummyItem("2","descarga2","Los simpsons","17-10-2017","-34.7769636","-58.2642679"));
-    }
 
-    private static void addItem(DummyItem item) {
+    public static void addItem(DummyItem item) {
         ITEMS.add(item);
-        ITEM_MAP.put(item.id, item);
+        ITEM_MAP.put(String.valueOf(item.id), item);   //Transformo el id int en string para ponerlo como clave
     }
 
     /**
      * A dummy item representing a piece of content.
      */
     public static class DummyItem {
-        public final String id;
-        public final String foto;    //Tipo drawable para poder cargar una imagen
+        public final int id;
+        public final byte[] foto;
         public final String nota;
         public final String fecha;
         public final String latitud;
         public final String longitud;
+        public final int id_usuario;
 
-        public DummyItem(String id, String foto, String nota, String fecha, String latitud, String longitud) {
+        public DummyItem(int id, byte[] foto, String nota, String fecha, String latitud, String longitud, int id_usuario) {
             this.id = id;
             this.foto = foto;
             this.nota = nota;
             this.fecha = fecha;
             this.latitud = latitud;
             this.longitud = longitud;
+            this.id_usuario = id_usuario;
         }
 
         @Override

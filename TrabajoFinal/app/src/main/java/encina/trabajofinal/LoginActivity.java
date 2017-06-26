@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+
 public class LoginActivity extends AppCompatActivity {
 
     private Button botonSesion;                    //Instancia para manejar el botonSesion
@@ -23,12 +24,18 @@ public class LoginActivity extends AppCompatActivity {
 
 
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) { //creo la instancia para relacionar con el layout
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);          //relaciono la clase con el layout de login
        /*/ Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);  //creo una instancia para la barra creada en el layout
         setSupportActionBar(toolbar);                            //uso la instancia  /*/
+
+
+
+
 
 
         //Referencia al boton
@@ -131,6 +138,7 @@ public class LoginActivity extends AppCompatActivity {
         }
         else{
             Toast.makeText(this, "Hay campos erroneos", Toast.LENGTH_LONG).show();
+
         }
 
     }

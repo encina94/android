@@ -30,15 +30,12 @@
 
 
     <LinearLayout
+        android:id="@+id/linearFragmento"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="0.32"
-        android:orientation="vertical">
+        android:layout_height="337dp"
+        android:orientation="vertical"
+        android:weightSum="1">
 
-        <WebView
-            android:id="@+id/mapa"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
     </LinearLayout>
 
     <LinearLayout

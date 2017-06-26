@@ -2,6 +2,9 @@ package encina.trabajofinal;
 
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -14,7 +17,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.provider.MediaStore;
+import android.graphics.BitmapFactory;
+
 
 
 import encina.trabajofinal.dummy.DummyContent;
@@ -36,11 +40,14 @@ public class ItemListActivity extends AppCompatActivity {
      * device.
      */
     private boolean mTwoPane;
+    private DatabaseHelper dbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_item_list);
+        dbHelper = new DatabaseHelper(this);
+        agregarItems();
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -52,8 +59,9 @@ public class ItemListActivity extends AppCompatActivity {
             public void onClick(View view) {
        /*/         Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();   /*/
-  /*/              Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                startActivityForResult(cameraIntent,0);  /*/
+                Intent agregarMomento = new Intent(ItemListActivity.this,AgregarMomento.class);
+                startActivity(agregarMomento);
+                            //Se acomienza el activity pasandole el intent y una constante
             }
         });
 
@@ -69,13 +77,26 @@ public class ItemListActivity extends AppCompatActivity {
             mTwoPane = true;
         }
     }
- /*/   public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode == RESULT_CANCELED){
-            String hola = "hola";
-        }else {
-           String hello = "blabla";
+
+    public void agregarItems(){
+        DummyContent.ITEMS.clear();              //Limpio el array de items cada vez que se vuelve a cargar el ItemListActivity
+                                                //Si no lo limpiara, al ser estatico el array cada vez que se ejecuta este intent
+                                               //A los items que ya estan se les agregan los mismos pero se suman al array
+        SQLiteDatabase bd = dbHelper.open();
+        String consulta="SELECT * from Momentos WHERE id_usuario='1'";
+        Cursor fila = bd.rawQuery(consulta,null);
+        if (fila !=null) {             //Si la consulta existe quiere decir que fila no va a ser null
+            fila.moveToFirst();         //Me muevo en los registros
+            for (int i = 0; i < fila.getCount(); i++) {        //Recorro cada Momento y lo agrego al array de ITEMS
+                DummyContent.addItem(new DummyContent.DummyItem(fila.getInt(0),fila.getBlob(1),fila.getString(2),fila.getString(3),fila.getString(4),fila.getString(5),fila.getInt(6)));
+                fila.moveToNext();
+            }
+            fila.close();
         }
-    } /*/
+        dbHelper.close();
+
+
+    }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
         recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(DummyContent.ITEMS));
@@ -100,16 +121,21 @@ public class ItemListActivity extends AppCompatActivity {
         @Override
         public void onBindViewHolder(final ViewHolder holder, int position) {   //Recibe como parametro la clase ViewHolder, que va a tener todos los parametros del item
             holder.mItem = mValues.get(position);                               //En la variable mItem se guarda la posicion de la lista de items que se trajo
-            holder.mIdView.setText(mValues.get(position).id);                   //En mIdView se guarda el id del item traido y se pega en un texto
-            holder.mFotoView.setImageResource(R.drawable.descarga2);
+            holder.mIdView.setText(String.valueOf(mValues.get(position).id));                   //En mIdView se guarda el id del item traido y se pega en un texto
+            Bitmap imagen = BitmapFactory.decodeByteArray(mValues.get(position).foto, 0, mValues.get(position).foto.length);
+            holder.mFotoView.setImageBitmap(imagen);
+
+         //   holder.mFotoView.setImageResource(R.drawable.descarga2);
             holder.mContentView.setText(mValues.get(position).nota);        //Aca se tra el id y la nota del item y se pegan en otro texto
+
+
 
             holder.mView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if (mTwoPane) {
                         Bundle arguments = new Bundle();
-                        arguments.putString(ItemDetailFragment.ARG_ITEM_ID, holder.mItem.id);
+                        arguments.putString(ItemDetailFragment.ARG_ITEM_ID, String.valueOf(holder.mItem.id));
                         ItemDetailFragment fragment = new ItemDetailFragment();
                         fragment.setArguments(arguments);
                         getSupportFragmentManager().beginTransaction()
@@ -121,7 +147,7 @@ public class ItemListActivity extends AppCompatActivity {
                         //El putExtra es algo asi como clave: valor...Variable: valor
                         //En este caso se envia la variable ARG_ITEM_ID = id del item en cuestion (el seleccionado)
                         //Al llegar a la otra actividad, esta va a reemplazar a la variable ya definida ARG_ITEM_ID, por lo que va a tener este nuevo valor del id del ITEM
-                        intent.putExtra(ItemDetailFragment.ARG_ITEM_ID, holder.mItem.id);  //Le mando como parametro la variable ARG_ITEM_ID con el valor id del ITEM
+                        intent.putExtra(ItemDetailFragment.ARG_ITEM_ID,String.valueOf(holder.mItem.id));  //Le mando como parametro la variable ARG_ITEM_ID con el valor id del ITEM
 
                         context.startActivity(intent);
                     }

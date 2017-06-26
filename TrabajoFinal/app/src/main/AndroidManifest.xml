@@ -4,6 +4,9 @@
 
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS" />
 
     <application
         android:allowBackup="true"
@@ -12,6 +15,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="@string/google_maps_key" />
+
         <activity android:name=".LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -24,6 +32,7 @@
             android:name=".ItemListActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar"></activity>
+        <activity android:name=".AgregarMomento"/>
         <activity
             android:name=".ItemDetailActivity"
             android:label="@string/title_item_detail"
