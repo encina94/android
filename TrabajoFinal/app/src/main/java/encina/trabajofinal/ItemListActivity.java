@@ -2,6 +2,7 @@ package encina.trabajofinal;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
@@ -12,7 +13,11 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -35,6 +40,7 @@ import java.util.List;
  */
 public class ItemListActivity extends AppCompatActivity {
 
+    private int id_usuario;
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
      * device.
@@ -47,7 +53,11 @@ public class ItemListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_item_list);
         dbHelper = new DatabaseHelper(this);
+        id_usuario = getIntent().getExtras().getInt("id");
         agregarItems();
+
+        //instancio el shared preferences para utilizar mas adelante
+
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -60,6 +70,7 @@ public class ItemListActivity extends AppCompatActivity {
        /*/         Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();   /*/
                 Intent agregarMomento = new Intent(ItemListActivity.this,AgregarMomento.class);
+                agregarMomento.putExtra("id",id_usuario);
                 startActivity(agregarMomento);
                             //Se acomienza el activity pasandole el intent y una constante
             }
@@ -68,6 +79,8 @@ public class ItemListActivity extends AppCompatActivity {
         View recyclerView = findViewById(R.id.item_list);
         assert recyclerView != null;
         setupRecyclerView((RecyclerView) recyclerView);
+
+
 
         if (findViewById(R.id.item_detail_container) != null) {
             // The detail container view will be present only in the
@@ -78,12 +91,41 @@ public class ItemListActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu, menu);
+        return true;
+    }
+
+    @Override
+
+    public boolean onOptionsItemSelected(MenuItem item){
+        SharedPreferences preferencias = getSharedPreferences("preferencias", Context.MODE_PRIVATE);
+        switch (item.getItemId()){
+            case R.id.action_cerrarSesion:
+                //Quita las preferencias del logeo automatico del usuario y redirecciona a la pagina del login
+                SharedPreferences.Editor editor = preferencias.edit();
+                editor.remove("user");
+                editor.remove("pass");
+                editor.remove("id");
+                editor.commit();
+                Intent login = new Intent(ItemListActivity.this, LoginActivity.class);
+                startActivity(login);
+                finish();
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+
+
     public void agregarItems(){
         DummyContent.ITEMS.clear();              //Limpio el array de items cada vez que se vuelve a cargar el ItemListActivity
                                                 //Si no lo limpiara, al ser estatico el array cada vez que se ejecuta este intent
                                                //A los items que ya estan se les agregan los mismos pero se suman al array
         SQLiteDatabase bd = dbHelper.open();
-        String consulta="SELECT * from Momentos WHERE id_usuario='1'";
+        String consulta="SELECT * from Momentos WHERE id_usuario='"+id_usuario+"';";
         Cursor fila = bd.rawQuery(consulta,null);
         if (fila !=null) {             //Si la consulta existe quiere decir que fila no va a ser null
             fila.moveToFirst();         //Me muevo en los registros
@@ -148,7 +190,7 @@ public class ItemListActivity extends AppCompatActivity {
                         //En este caso se envia la variable ARG_ITEM_ID = id del item en cuestion (el seleccionado)
                         //Al llegar a la otra actividad, esta va a reemplazar a la variable ya definida ARG_ITEM_ID, por lo que va a tener este nuevo valor del id del ITEM
                         intent.putExtra(ItemDetailFragment.ARG_ITEM_ID,String.valueOf(holder.mItem.id));  //Le mando como parametro la variable ARG_ITEM_ID con el valor id del ITEM
-
+                        intent.putExtra("id",id_usuario);
                         context.startActivity(intent);
                     }
                 }

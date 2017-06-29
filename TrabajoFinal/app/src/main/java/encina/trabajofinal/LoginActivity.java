@@ -10,6 +10,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
+import android.content.SharedPreferences;
+import android.content.Context;
 
 
 public class LoginActivity extends AppCompatActivity {
@@ -19,6 +21,7 @@ public class LoginActivity extends AppCompatActivity {
     private TextInputLayout usuario;
     private TextInputLayout contraseña;
     private DatabaseHelper dbHelper;                            //Creo una variable de de tipo DatabaseHelper para despues instanciarla
+    private int id;
 
 
 
@@ -32,6 +35,22 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);          //relaciono la clase con el layout de login
        /*/ Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);  //creo una instancia para la barra creada en el layout
         setSupportActionBar(toolbar);                            //uso la instancia  /*/
+
+       //Comprueba si hay datos de usuario en el shared preferences para autenticar automaticamente, si esto no ocurre
+        //Procede a crear todos los botones y acciones del login para que el usuario se autentique
+        SharedPreferences preferencias = getSharedPreferences("preferencias", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferencias.edit();
+        String loginUser = preferencias.getString("user", "");
+        String loginPass = preferencias.getString("pass", "");
+        String idUser = preferencias.getString("id","");
+        //Si los datos tomados del sharedPreferences no estan vacios entonces autentico
+        if (loginUser.length()>0 && loginPass.length()>0) {
+            Intent intent= new Intent(LoginActivity.this, ItemListActivity.class);     //asocio la instancia de redireccion de la activity actual a la de register
+            intent.putExtra("id",Integer.parseInt(idUser));
+            startActivity(intent); //Realizo la redireccion
+            finish();
+        }
+
 
 
 
@@ -63,12 +82,14 @@ public class LoginActivity extends AppCompatActivity {
 
     private boolean validarUsuario(String user){
         SQLiteDatabase bd = dbHelper.open();
-        String consulta = "SELECT usuario FROM Usuarios WHERE usuario= '" + user + "';";
+        String consulta = "SELECT id, usuario FROM Usuarios WHERE usuario= '" + user + "';";
         //Si el usuario no existe se dispara una excepcion, por eso se usa el try y el catch
         try {
             Cursor fila = bd.rawQuery(consulta, null);
             if (fila.moveToNext()) {                   //si existe un usuario en la bd con el mismo nombre que el ingresado, se prosigue, sino se dispara una excepcion
-                String userBd = fila.getString(0);                   //lo guardo en una variable
+                id = fila.getInt(0);
+                String userBd = fila.getString(1);                   //lo guardo en una variable
+
                 if (user.equals(userBd)) {                           //Lo comparo con el ingresado por el usuario y le aviso que no esta disponible si son iguales
                     usuario.setError(null);        //Se setea el textInputLayout
                     bd.close();
@@ -131,9 +152,19 @@ public class LoginActivity extends AppCompatActivity {
         boolean passValidacion = validarPass(pass,user);
 
         if (userValidacion && passValidacion) {
+            //Guardo los datos del usuario en el shared preferences para luego autenticar automaticamente
+            SharedPreferences preferencias = getSharedPreferences("preferencias", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = preferencias.edit();
+            editor.putString("user",user);
+            editor.putString("pass",pass);
+            editor.putString("id",Integer.toString(id));
+            editor.commit();
+            //Muestro que el usuario fue autenticado correctamente y luego redirecciono
             Toast.makeText(this, "Usuario logueado", Toast.LENGTH_LONG).show();
             Intent intent= new Intent(LoginActivity.this, ItemListActivity.class);     //asocio la instancia de redireccion de la activity actual a la de register
-            startActivity(intent);                                                     //Realizo la redireccion
+            intent.putExtra("id",id);
+            startActivity(intent); //Realizo la redireccion
+            finish();     //Mato la actividad
 
         }
         else{

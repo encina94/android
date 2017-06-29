@@ -18,10 +18,15 @@ import android.view.MenuItem;
  */
 public class ItemDetailActivity extends AppCompatActivity {
 
+    private int id_usuario;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_item_detail);
+        id_usuario= getIntent().getExtras().getInt("id");
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.detail_toolbar);
         setSupportActionBar(toolbar);
 
@@ -71,8 +76,9 @@ public class ItemDetailActivity extends AppCompatActivity {
         int id = item.getItemId();
         if (id == android.R.id.home) {
             // Este ID representa volver atras, en el caso de esta actividad es para el boton de arriba
-
-            navigateUpTo(new Intent(this, ItemListActivity.class));             //Te hace volver a la clase anterior o sea ItemListActivity
+            Intent itemListActivity = new Intent(this,ItemListActivity.class);
+            itemListActivity.putExtra("id",id_usuario);
+            navigateUpTo(itemListActivity);             //Te hace volver a la clase anterior o sea ItemListActivity
             return true;
         }
         return super.onOptionsItemSelected(item);

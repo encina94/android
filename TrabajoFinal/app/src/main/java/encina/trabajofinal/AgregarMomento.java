@@ -65,7 +65,7 @@ public class AgregarMomento extends AppCompatActivity {
 
 
 
-    private int user = 1;
+    private int user;
 
 
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,6 +78,7 @@ public class AgregarMomento extends AppCompatActivity {
         fecha = (TextView) findViewById(R.id.textFecha);
         lati = (TextView) findViewById(R.id.textLatitud);
         longi = (TextView) findViewById(R.id.textLongitud);
+        user = getIntent().getExtras().getInt("id");
 
         dbHelper = new DatabaseHelper(this);
 
@@ -88,7 +89,10 @@ public class AgregarMomento extends AppCompatActivity {
             public void onClick(View v){
                 guardarDatos();
                 Intent listActivity = new Intent(AgregarMomento.this, ItemListActivity.class);
-                startActivity(listActivity);
+                listActivity.putExtra("id",user);
+                //Añado los flags que (si ya hay una actividad del intent ejecutandose en la pila en segundo plano, va a esa y elimina todas las posteriores
+                startActivity(listActivity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+
             }
         });
 
@@ -150,7 +154,7 @@ public class AgregarMomento extends AppCompatActivity {
         registro.put("fecha", fecha.getText().toString());
         registro.put("latitud",latitud);
         registro.put("longitud",longitud);
-        registro.put("id_usuario",1);
+        registro.put("id_usuario",user);
 
         SQLiteDatabase bd = dbHelper.open();           //abro la bd
 
